@@ -1,11 +1,12 @@
 from random import choice
 remaining_cards = 0
-suits = ["Spades", "Hearts", "Diamonds", "Clubs"]
+suits = []
 
 
 def new_deck(decks):
     global remaining_cards
     global suits
+    suits = ["Spades", "Hearts", "Diamonds", "Clubs"]
     remaining_cards = 52 * decks
     possible_cards = [number for number in range(2, 15)]
     deck = {}
@@ -86,13 +87,20 @@ def check_for_ace(hand, value):
 
 
 number_of_decks = int(input("Number of decks:\n"))
+stake = int(input("Starting money:\n"))
+initial_stake = stake
 working_deck = new_deck(number_of_decks)
-# print(working_deck)
 # deal the cards
 dealing = True
 while dealing:
     dealer_hand = []
     player_hand = []
+    print("You have ${} remaining".format(stake))
+    bet = int(input("Your bet:\n"))
+    while bet > stake:
+        print("You don't have enough money")
+        bet = int(input("Your bet\n"))
+    stake -= bet
     dealer_card_1 = deal_card(working_deck)
     dealer_hand.append(dealer_card_1[1])
     player_card_1 = deal_card(working_deck)
@@ -100,10 +108,13 @@ while dealing:
     dealer_card_2 = deal_card(working_deck)
     dealer_hand.append(dealer_card_2[1])
     player_card_2 = deal_card(working_deck)
-    player_hand.append(player_card_2[1])
+    if player_card_2[1] == 11 and player_card_2[1] == 11:
+        player_hand.append(1)
+    else:
+        player_hand.append(player_card_2[1])
     dealer_value = sum(dealer_hand)
     player_value = sum(player_hand)
-    print("You have the {0} and the {1}\n for a total of {2}".format(player_card_1[0], player_card_2[0], player_value))
+    print("You have the {0} and the {1}\nfor a total of {2}".format(player_card_1[0], player_card_2[0], player_value))
     print("The dealer is showing the {0}".format(dealer_card_2[0]))
     player_hand, hand_total = play_out_hand(working_deck, player_value, player_hand)
     if hand_total > 21:
@@ -125,12 +136,30 @@ while dealing:
             print("The dealer has {}".format(dealer_value))
             if dealer_value > 21:
                 print("DEALER BUSTS")
+                print("You won ${}".format(bet))
+                stake += bet*2
             elif hand_total > dealer_value:
                 print("YOU WIN")
+                print("You won ${}".format(bet))
+                stake += bet*2
             elif hand_total < dealer_value:
                 print("DEALER WINS")
+                print("You lost ${}".format(bet))
             else:
                 print('PUSH')
-    again = input("Play again? (Y/N)".lower())
-    if again == "n":
+                stake += bet
+    if stake == 0:
+        print("You're out of money\nBetter luck next time!")
         dealing = False
+    else:
+        again = input("Play again? (Y/N)".lower())
+        if again == "n":
+            winnings = stake - initial_stake
+            if winnings > 0:
+                print("You won ${0} and walked away with ${1}".format(winnings, stake))
+                print("****CONGRATULATIONS****")
+            if winnings == 0:
+                print("You broke even and walked away with ${0}".format(stake))
+            else:
+                print("You lost ${0} and walked away with ${1}".format(-winnings, stake))
+            dealing = False
