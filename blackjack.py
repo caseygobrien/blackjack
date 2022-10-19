@@ -1,25 +1,22 @@
-from random import choice
+import random
 remaining_cards = 0
 number_of_decks = 0
 stake = 0
 bet = 0
-suits = []
+suits = {"s": "spades", "c": "clubs", "d": "diamonds", "h": "hearts"}
+deck_of_cards = ["2h", "3h", "4h", "h5", "6h", "7h", "8h", "9h", "10h", "11h", "12h", "13h", "14h",
+                 "2d", "3d", "4d", "5d", "6d", "7d", "8d", "9d", "10d", "11d", "12d", "13d", "14d",
+                 "2c", "3c", "4c", "5c", "6c", "7c", "8c", "9c", "10c", "11c", "12c", "13c", "14c",
+                 "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "10s", "11s", "12s", "13s", "14s"]
 
 
 # build a playable deck of cards from a specified number of decks
 def new_deck(decks):
     global remaining_cards
-    global suits
-    suits = ["Spades", "Hearts", "Diamonds", "Clubs"]
+    global deck_of_cards
     remaining_cards = 52 * decks
-    possible_cards = [number for number in range(2, 15)]
-    deck = {}
-    for suit in suits:
-        deck[suit] = []
-    for i in range(decks):
-        for suit in suits:
-            for card in possible_cards:
-                deck[suit].append(card)
+    deck = deck_of_cards * decks
+    random.shuffle(deck)
     # burn one card
     deal_card(deck)
     return deck
@@ -31,14 +28,12 @@ def deal_card(deck):
     global suits
     global number_of_decks
     global working_deck
-    card_suit = choice(suits)
-    if not deck[card_suit]:
-        suits.remove(card_suit)
-        card_suit = choice(suits)
-    card_value = choice(deck[card_suit])
-    # remember to remove the card from the deck
-    deck[card_suit].remove(card_value)
-    # change the cards from numbers to names
+    card = deck.pop(0)
+    card_value = int(card[:-1])
+    card_suit = card[-1]
+    for suit in suits:
+        if card_suit == suit:
+            card_suit = suits[suit]
     card_names = {11: "Jack", 12: "Queen", 13: "King", 14: "Ace"}
     changed_name = ''
     for number in card_names:
@@ -181,8 +176,10 @@ working_deck = new_deck(number_of_decks)
 
 dealing = True
 while dealing:
+    insurance = ""
     print("You have ${} remaining".format(stake))
     bet = place_your_bet()
+    insurance_bet = 0.5 * bet
     # deal the cards
     dealer_hand = []
     player_hand = []
@@ -205,6 +202,14 @@ while dealing:
     player_value = sum(player_hand)
     print("You have the {0} and the {1}\nfor a total of {2}".format(player_card_1[0], player_card_2[0], player_value))
     print("The dealer is showing the {0}".format(dealer_card_2[0]))
+    if dealer_card_2[1] == 11:
+        insurance = input("Insurance? Y/N:\n".lower())
+        if insurance == "y":
+            if stake < insurance_bet:
+                print("You don't have enough money to purchase insurance")
+                insurance = "n"
+            else:
+                stake -= insurance_bet
     # check for blackjack!
     if player_value == 21:
         print("You have blackjack!")
@@ -217,6 +222,9 @@ while dealing:
                 continue
         else:
             print("Dealer has blackjack, you have pushed")
+            if insurance == "y":
+                print("Insurance pays you ${0}".format(insurance_bet))
+                stake += bet
             stake += bet
             if end_game() == "n":
                 break
@@ -225,7 +233,11 @@ while dealing:
     # check for dealer blackjack
     if dealer_value == 21:
         print("Dealer has blackjack!")
-        print("You lost {0}".format(bet))
+        if insurance == "y":
+            print("Insurance pays you {0}".format(insurance_bet))
+            stake += bet
+        else:
+            print("You lost {0}".format(bet))
         if end_game() == 'n':
             break
         else:
