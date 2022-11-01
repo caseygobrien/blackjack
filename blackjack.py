@@ -3,6 +3,7 @@ remaining_cards = 0
 number_of_decks = 0
 stake = 0
 bet = 0
+final_hands = {}
 # build a playable deck of cards from a specified number of decks
 def new_deck(decks):
     global remaining_cards
@@ -24,17 +25,12 @@ def deal_card(deck):
     global remaining_cards
     card = deck.pop(0)
     card_value = int(card[:-1])
-    card_suit = card[-1]
     suits = {"s": "Spades", "c": "Clubs", "d": "Diamonds", "h": "Hearts"}
-    for suit in suits:
-        if card_suit == suit:
-            card_suit = suits[suit]
+    card_suit = suits[card[-1]]
     card_names = {11: "Jack", 12: "Queen", 13: "King", 14: "Ace"}
     changed_name = ''
-    for number in card_names:
-        if card_value == number:
-            changed_name = card_names[number]
-    # change the values of all face cards to 10
+    if card_value in card_names:
+        changed_name = card_names[card_value]
     if 10 < card_value < 14:
         card_value = 10
     # and change aces to 11
@@ -112,8 +108,6 @@ def play_out_hand(hand, bet):
                     print("YOU HAVE BUSTED")
                     print("You lose {0}".format(bet))
                     print("\n*************\n")
-                    # if not check_money(stake):
-                    #     break
                 return None
             else:
                 print("You got the {0}\nfor a total of {1}".format(next_card[0], hand_value))
@@ -123,7 +117,7 @@ def play_out_hand(hand, bet):
                     return hand_value, bet
                 else:
                     continue
-        # stand returns hand and value
+        # stand returns hand value
         elif play == "s":
             return hand_value, bet
         else:
@@ -137,17 +131,21 @@ def split(hand, bet):
     hand_1 = [hand[0]]
     hand_2 = [hand[1]]
     new_card = deal_card(working_deck)
-    hand_1.append(new_card[1])
+    if hand_1[0] == 11 and new_card[1] == 11:
+        hand_1.append(1)
+    else:
+        hand_1.append(new_card[1])
     hand_1_value = sum(hand_1)
     print("First hand receives the {0}\nfor a total of {1}".format(new_card[0], hand_1_value))
     final_hand_1 = play_out_hand(hand_1, bet_1)
-    # hand_1_value, bet_1 = play_out_hand(hand_1, bet_1)
     new_card = deal_card(working_deck)
-    hand_2.append(new_card[1])
+    if hand_2[0] == 11 and new_card[1] == 1:
+        hand_2.append(1)
+    else:
+        hand_2.append(new_card[1])
     hand_2_value = sum(hand_2)
     print("Second hand receives the {0}\nfor a total of {1}".format(new_card[0], hand_2_value))
     final_hand_2 = play_out_hand(hand_2, bet_2)
-    # hand_2_value, bet_2 = play_out_hand(hand_2, bet_2)
     if final_hand_1 and final_hand_2:
         return final_hand_1[0], final_hand_1[1], final_hand_2[0], final_hand_2[1]
     elif final_hand_1:
@@ -176,7 +174,7 @@ def play_dealer_hand(dealer_card, dealer_hand):
     return dealer_value
 
 
-# remove the 11 and add a 1
+# remove an 11 and add a 1
 def switch_ace_to_1(hand):
     hand.remove(11)
     hand.append(1)
@@ -262,7 +260,6 @@ while dealing:
     player_hand.append(player_card_1[1])
     dealer_card_2 = deal_card(working_deck)
     player_card_2 = deal_card(working_deck)
-    # if anyone has two aces, change one of them from 11 to 1
     if dealer_card_1[1] == 11 and dealer_card_2[1] == 11:
         dealer_hand.append(1)
     else:
@@ -325,6 +322,7 @@ while dealing:
         else:
             continue
     # player plays out his or her hand
+    final_hands[1] = player_hand
     hand_results = play_out_hand(player_hand, bet)
     if hand_results:
         number_of_hands = int(len(hand_results)/2)
@@ -367,15 +365,9 @@ while dealing:
     else:
         if not check_money(stake):
             break
-        elif end_game() == "n":
-            break
-        else:
-            continue
     if end_game() == "n":
         dealing = False
     # build a new deck if the current deck is 2/3rds gone
     elif remaining_cards < (number_of_decks*52)/3:
         working_deck = new_deck(number_of_decks)
         print("*****SHUFFLING*****")
-    else:
-        continue
