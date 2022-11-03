@@ -31,6 +31,7 @@ def deal_card(deck):
     changed_name = ''
     if card_value in card_names:
         changed_name = card_names[card_value]
+    # change face cards to 10
     if 10 < card_value < 14:
         card_value = 10
     # and change aces to 11
@@ -64,96 +65,78 @@ def get_player_choices(hand, cards=0):
 
 
 # player plays out their hand
-def play_out_hand(hand, bet):
+def play_out_hand():
+    global final_hands
     global remaining_cards
     global stake
     global working_deck
-    hand_value = sum(hand)
-    playing = True
+    current_hand = []
     cards_dealt = 0
-    while playing:
-        play = get_player_choices(hand, cards_dealt)
+    for hand in final_hands:
+        if len(final_hands) > 1:
+            print("\n************\n")
+            print("Playing hand {0}\n".format(hand))
+        current_hand = final_hands[hand][0]
+        current_bet = final_hands[hand][1]
+        current_hand_value = sum(current_hand)
+        play = get_player_choices(current_hand, cards_dealt)
+        #splits!
         if play == "sp":
-            if bet > stake:
-                print("You don't have enough money to split")
-                continue
-            else:
-                return split(hand, bet)
-        elif play == "d":
-            if stake < bet:
-                print("You don't have enough money to double down")
-                continue
-            else:
-                stake -= bet
-                bet = 2 * bet
+            split(current_hand, current_bet)
         # hit or double gets a new card
-        if play == "h" or play == "d":
+        if play == "d" and cards_dealt == 0:
+            if stake < current_bet:
+                print("You don't have enough money to double down\n")
+                play = get_player_choices(current_hand)
+            else:
+                stake -= current_bet
+                current_bet = current_bet * 2
+                next_card = deal_card(working_deck)
+                cards_dealt += 1
+                current_hand.append(next_card[1])
+                current_hand_value += next_card[1]
+            # if player busts, check for an ace valued at 11 and change it to a 1
+                if current_hand_value > 21 and 11 in current_hand:
+                    current_hand, current_hand_value = switch_ace_to_1(current_hand)
+                print("You got the {0}\nfor a total of {1}".format(next_card[0], current_hand_value))
+                play = 's'
+        while play == "h":
             next_card = deal_card(working_deck)
             cards_dealt += 1
-            hand.append(next_card[1])
-            hand_value += next_card[1]
-            print("\n*************\n")
-        # if player busts, check for an ace valued at 11 and change it to a 1
-            if hand_value > 21:
-                if 11 in hand:
-                    hand, hand_value = switch_ace_to_1(hand)
-                    print("You got the {0}\nfor a total of {1}".format(next_card[0], hand_value))
-                    print("\n*************\n")
-                    if play == "d":
-                        return hand_value, bet
-                    else:
-                        continue
-                else:
-                    print("You got the {0}\nfor a total of {1}".format(next_card[0], hand_value))
-                    print("YOU HAVE BUSTED")
-                    print("You lose {0}".format(bet))
-                    print("\n*************\n")
-                return None
-            else:
-                print("You got the {0}\nfor a total of {1}".format(next_card[0], hand_value))
-                print("\n*************\n")
-            # Player ony gets one card for doubling down
-                if play == "d":
-                    return hand_value, bet
-                else:
-                    continue
-        # stand returns hand value
-        elif play == "s":
-            return hand_value, bet
-        else:
-            continue
+            current_hand.append(next_card[1])
+            current_hand_value += next_card[1]
+            # if player busts, check for an ace valued at 11 and change it to a 1
+            if current_hand_value > 21 and 11 in current_hand:
+                current_hand, current_hand_value = switch_ace_to_1(current_hand)
+            print("You got the {0}\nfor a total of {1}".format(next_card[0], current_hand_value))
+            if current_hand_value > 21:
+                play = 's'
+                continue
+            play = get_player_choices(current_hand, cards_dealt)
+        if play == "s":
+            final_hands[hand] = current_hand, current_bet
 
 
 def split(hand, bet):
+    global final_hands
+    global remaining_cards
+    global stake
     global working_deck
-    bet_1 = bet
-    bet_2 = bet
+    stake -= bet
+    print("Splitting hand:")
     hand_1 = [hand[0]]
     hand_2 = [hand[1]]
-    new_card = deal_card(working_deck)
-    if hand_1[0] == 11 and new_card[1] == 11:
-        hand_1.append(1)
-    else:
-        hand_1.append(new_card[1])
-    hand_1_value = sum(hand_1)
-    print("First hand receives the {0}\nfor a total of {1}".format(new_card[0], hand_1_value))
-    final_hand_1 = play_out_hand(hand_1, bet_1)
-    new_card = deal_card(working_deck)
-    if hand_2[0] == 11 and new_card[1] == 1:
-        hand_2.append(1)
-    else:
-        hand_2.append(new_card[1])
-    hand_2_value = sum(hand_2)
-    print("Second hand receives the {0}\nfor a total of {1}".format(new_card[0], hand_2_value))
-    final_hand_2 = play_out_hand(hand_2, bet_2)
-    if final_hand_1 and final_hand_2:
-        return final_hand_1[0], final_hand_1[1], final_hand_2[0], final_hand_2[1]
-    elif final_hand_1:
-        return final_hand_1[0], final_hand_1[1]
-    elif final_hand_2:
-        return final_hand_2[0], final_hand_2[1]
-    else:
-        return None
+    hand_1_new_card = deal_card(working_deck)
+    hand_1.append(hand_1_new_card[1])
+    hand_1_total = sum(hand_1)
+    print("Your first hand got the {0}\nfor a total of {1}".format(hand_1_new_card[0], hand_1_total))
+    print("**********\n")
+    hand_2_new_card = deal_card(working_deck)
+    hand_2.append(hand_2_new_card[1])
+    hand_2_total = sum(hand_2)
+    print("And your second hand got the {0}\n for a total of {1}".format(hand_2_new_card[0], hand_2_total))
+    final_hands[1] = [hand_1], bet
+    final_hands[2] = [hand_2], bet
 
 
 def play_dealer_hand(dealer_card, dealer_hand):
@@ -170,6 +153,7 @@ def play_dealer_hand(dealer_card, dealer_hand):
         print("The dealer gets the {}".format(next_dealer_card[0]))
     if dealer_value > 21:
         return None
+    print("The dealer has {0}".format(dealer_value))
     print("\n*************\n")
     return dealer_value
 
@@ -201,6 +185,7 @@ def place_your_bet():
 def end_game():
     global stake
     global initial_stake
+    print("You have ${0}".format(stake))
     again = input("Play again? (Y/N)".lower())
     # if no, end the game and inform player of their win or loss
     if again == "n":
@@ -232,7 +217,8 @@ while ask_decks:
         print("Please enter a number")
         continue
     ask_decks = False
-# get starting money
+
+# # get starting money
 ask_stake = True
 while ask_stake:
     try:
@@ -276,18 +262,18 @@ while dealing:
     print("\n*************\n")
     if dealer_card_2[1] == 11:
         ask_insurance = input("Insurance? Y/N:\n".lower())
-        if insurance == "y":
+        if ask_insurance == "y":
             if stake < insurance_bet:
                 print("You don't have enough money to purchase insurance")
-                insurance = "n"
+                ask_insurance = "n"
             else:
-                Insurance = True
+                insurance = True
                 stake -= insurance_bet
     # check for blackjack!
     if player_value == 21:
         print("You have blackjack!")
         if dealer_value < 21:
-            print("You won {0}".format(int(bet * 1.5)))
+            print("You won ${0}".format(int(bet * 1.5)))
             stake += int(bet + (bet * 1.5))
             print("\n*************\n")
             if end_game() == "n":
@@ -297,8 +283,8 @@ while dealing:
         else:
             print("Dealer has blackjack, you have pushed")
             if insurance:
-                print("Insurance pays you ${0}".format(insurance_bet))
-                stake += bet * 2
+                print("Insurance pays you ${0}".format(bet * 1.5))
+                stake += bet * 2.5
             else:
                 stake += bet
             print("\n*************\n")
@@ -310,10 +296,10 @@ while dealing:
     if dealer_value == 21:
         print("Dealer has blackjack!")
         if insurance:
-            print("Insurance pays you {0}".format(insurance_bet))
-            stake += bet
+            print("Insurance pays you ${0}".format(bet * 1.5))
+            stake += bet + insurance_bet
         else:
-            print("You lost {0}".format(bet))
+            print("You lost ${0}".format(bet))
         if not check_money(stake):
             break
         print("\n*************\n")
@@ -322,52 +308,54 @@ while dealing:
         else:
             continue
     # player plays out his or her hand
-    final_hands[1] = player_hand
-    hand_results = play_out_hand(player_hand, bet)
-    if hand_results:
-        number_of_hands = int(len(hand_results)/2)
-        final_hands = {1: (hand_results[0], hand_results[1])}
-        if number_of_hands > 1:
-            final_hands[2] = (hand_results[2], hand_results[3])
-        if number_of_hands > 2:
-            final_hands[3] = (hand_results[4], hand_results[5])
-        if number_of_hands > 3:
-            final_hands[4] = (hand_results[6], hand_results[7])
+    final_hands[1] = player_hand, bet
+    play_out_hand()
+    for hand in final_hands:
+        current_hand = final_hands[hand][0]
+        hand_total = sum(current_hand)
+        current_bet = final_hands[hand][1]
+        if len(final_hands) > 1:
+            print("*" * 20 + "\n")
+            print("Playing hand {0} of {1}\n".format(hand, len(final_hands)))
+        print("\n*************\n")
+        print("Your total is {0}".format(hand_total))
+        if hand_total > 21:
+            print("YOU HAVE BUSTED")
+            print("You lost {0}".format(current_bet))
+            bust = True
+            continue
+        else:
+            bust = False
+    if not bust:
         final_dealer_value = play_dealer_hand(dealer_card_1, dealer_hand)
         if not final_dealer_value:
             print("DEALER BUSTS")
-        for hand in range(number_of_hands):
-            if number_of_hands > 1:
-                print("HAND {0}".format(hand + 1))
+            print("\n*************\n")
+    for hand in final_hands:
+            if len(final_hands) > 1:
+                print("HAND {0}".format(hand))
                 print("\n*************\n")
-            playing_hand = final_hands[hand+1]
-            playing_total = playing_hand[0]
-            playing_bet = playing_hand[1]
-            if not final_dealer_value:
-                print("You win ${0}".format(playing_bet))
-                stake += playing_bet * 2
-            else:
-                print("You have {0}".format(playing_total))
-                print("The dealer has {0}".format(final_dealer_value))
-                if playing_total > final_dealer_value:
-                    print("PLAYER WINS")
-                    print("You won ${0}".format(playing_bet))
-                    stake += playing_bet * 2
-                elif playing_total < final_dealer_value:
-                    print("DEALER WINS")
-                    print("You lost ${0}".format(playing_bet))
+            hand_total = sum(final_hands[hand][0])
+            hand_bet = final_hands[hand][1]
+            if hand_total <= 21:
+                if not final_dealer_value:
+                    print("You win ${0}".format(hand_bet))
+                    stake += hand_bet * 2
+                    continue
+                elif hand_total > final_dealer_value:
+                    print("You won ${0}".format(hand_bet))
+                    stake += hand_bet * 2
+                elif hand_total < final_dealer_value:
+                    print("You lost ${0}".format(hand_bet))
                 else:
                     print('PUSH')
-                    stake += playing_bet
+                    stake += hand_bet
             print("\n*************\n")
-        if not check_money(stake):
-            break
-    else:
-        if not check_money(stake):
-            break
+    if not check_money(stake):
+        break
     if end_game() == "n":
         dealing = False
-    # build a new deck if the current deck is 2/3rds gone
+    # # build a new deck if the current deck is 2/3rds gone
     elif remaining_cards < (number_of_decks*52)/3:
         working_deck = new_deck(number_of_decks)
         print("*****SHUFFLING*****")
