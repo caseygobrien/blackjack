@@ -50,7 +50,7 @@ def get_player_choice(hand, bet, card=False):
     global stake
     global number_of_hands
     possible_choices = ["h", "s", "d", "sp"]
-    if not card and stake > bet and number_of_hands < 4:
+    if not card and stake >= bet and number_of_hands < 4:
         if hand[0] == hand[1] or hand[0] == 11 and hand[1] == 1:
             choice = input("""Would you like to
 [H]it
@@ -119,6 +119,7 @@ def play_out_hand(hand, bet, choice):
 def play_dealer_hand(dealer_card, dealer_hand):
     global working_deck
     dealer_value = sum(dealer_hand)
+    print("\n*************\n")
     print("The dealer's hole card is the {0}\nfor a total of {1}".format(dealer_card[0], dealer_value))
     # dealer hits with less than 17 or a soft 17
     while dealer_value < 17 or dealer_value == 17 and 11 in dealer_hand:
@@ -130,7 +131,6 @@ def play_dealer_hand(dealer_card, dealer_hand):
         print("The dealer gets the {}".format(next_dealer_card[0]))
     if dealer_value > 21:
         return None
-    print("The dealer has {0}".format(dealer_value))
     print("\n*************\n")
     return dealer_value
 
@@ -240,7 +240,8 @@ while dealing:
     player_value = sum(player_hand)
     number_of_hands = 1
     print("*************\n")
-    print("You have the {0} and the {1}\nfor a total of {2}".format(player_card_1[0], player_card_2[0], player_value))
+    print("You have the {0} and the {1}\nfor a total of {2}".format(player_card_1[0],
+                                                                    player_card_2[0], player_value))
     print("The dealer is showing the {0}".format(dealer_card_2[0]))
     print("\n*************\n")
     if dealer_card_2[1] == 11:
@@ -302,7 +303,8 @@ while dealing:
             player_hand_1_value = sum(player_hand_1)
             print("\n*************\n")
             print("\nPLAYING FIRST HAND\n")
-            print("You got the {0}\nfor a total of {1}".format(player_hand_1_card_2[0], player_hand_1_value))
+            print("You got the {0}\nfor a total of {1}".format(player_hand_1_card_2[0],
+                                                               player_hand_1_value))
             player_choice = get_player_choice(player_hand_1, hand_1_bet)
             if player_choice == "sp":
                 print("--SPLITTING--\n")
@@ -317,7 +319,8 @@ while dealing:
                 player_hand_3_value = sum(player_hand_3)
                 print("\n*************\n")
                 print("\nPLAYING NEXT HAND\n")
-                print("You got the {0}\nfor a total of {1}".format(player_hand_3_card_2[0], player_hand_3_value))
+                print("You got the {0}\nfor a total of {1}".format(player_hand_3_card_2[0],
+                                                                   player_hand_3_value))
                 player_choice = get_player_choice(player_hand_3, hand_3_bet)
                 if player_choice == "sp":
                     print("--SPLITTING--\n")
@@ -332,7 +335,8 @@ while dealing:
                     player_hand_5_value = sum(player_hand_5)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\nfor a total of {1}".format(player_hand_5_card_2[0], player_hand_5_value))
+                    print("You got the {0}\nfor a total of {1}".format(player_hand_5_card_2[0],
+                                                                       player_hand_5_value))
                     player_choice = get_player_choice(player_hand_5, hand_5_bet)
                     final_hand_5 = play_out_hand(player_hand_5, hand_5_bet, player_choice)
                     if final_hand_5:
@@ -342,7 +346,8 @@ while dealing:
                     player_hand_6_value = sum(player_hand_6)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\nfor a total of {1}".format(player_hand_6_card_2[0], player_hand_6_value))
+                    print("You got the {0}\nfor a total of {1}".format(player_hand_6_card_2[0],
+                                                                       player_hand_6_value))
                     player_choice = get_player_choice(player_hand_6, hand_6_bet)
                     final_hand_6 = play_out_hand(player_hand_6, hand_6_bet, player_choice)
                     if final_hand_6:
@@ -356,7 +361,8 @@ while dealing:
                 player_hand_4_value = sum(player_hand_4)
                 print("\n*************\n")
                 print("\nPLAYING NEXT HAND\n")
-                print("You got the {0}\nfor a total of {1}".format(player_hand_4_card_2[0], player_hand_4_value))
+                print("You got the {0}\nfor a total of {1}".format(player_hand_4_card_2[0],
+                                                                   player_hand_4_value))
                 player_choice = get_player_choice(player_hand_4, hand_4_bet)
                 if player_choice == "sp":
                     print("--SPLITTING--\n")
@@ -371,7 +377,8 @@ while dealing:
                     player_hand_7_value = sum(player_hand_7)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\n for a total of {1}".format(player_hand_7_card_2[0], player_hand_7_value))
+                    print("You got the {0}\n for a total of {1}".format(player_hand_7_card_2[0],
+                                                                        player_hand_7_value))
                     player_choice = get_player_choice(player_hand_7, hand_7_bet)
                     final_hand_7 = play_out_hand(player_hand_7, hand_7_bet, player_choice)
                     if final_hand_7:
@@ -381,13 +388,15 @@ while dealing:
                     player_hand_8_value = sum(player_hand_8)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\n for a total of {1}".format(player_hand_8_card_2[0], player_hand_8_value))
+                    print("You got the {0}\n for a total of {1}".format(player_hand_8_card_2[0],
+                                                                        player_hand_8_value))
                     player_choice = get_player_choice(player_hand_8, hand_8_bet)
                     final_hand_8 = play_out_hand(player_hand_8, hand_8_bet, player_choice)
                     if final_hand_8:
                         final_hands.append(final_hand_8)
                 else:
-                    player_hand_4_value, hand_4_bet = play_out_hand(player_hand_4, hand_4_bet, player_choice)
+                    player_hand_4_value, hand_4_bet = play_out_hand(player_hand_4, hand_4_bet,
+                                                                    player_choice)
                     if player_hand_4_value:
                         final_hands.append((player_hand_4_value, hand_4_bet))
             else:
@@ -399,7 +408,8 @@ while dealing:
                 player_hand_2_value = sum(player_hand_2)
                 print("\n*************\n")
                 print("\nPLAYING NEXT HAND\n")
-                print("You got the {0}\nfor a total of {1}".format(player_hand_2_card_2[0], player_hand_2_value))
+                print("You got the {0}\nfor a total of {1}".format(player_hand_2_card_2[0],
+                                                                   player_hand_2_value))
                 player_choice = get_player_choice(player_hand_2, hand_2_bet)
                 if player_choice == "sp":
                     print("--SPLITTING--\n")
@@ -414,7 +424,8 @@ while dealing:
                     player_hand_9_value = sum(player_hand_9)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\n for a total of {1}".format(player_hand_9_card_2[0], player_hand_9_value))
+                    print("You got the {0}\n for a total of {1}".format(player_hand_9_card_2[0],
+                                                                        player_hand_9_value))
                     player_choice = get_player_choice(player_hand_9, hand_9_bet)
                     if player_choice == "sp":
                         print("--SPLITTING--\n")
@@ -432,7 +443,8 @@ while dealing:
                         print("You got the {0}\n for a total of {1}".format(player_hand_11_card_2[0],
                                                                             player_hand_11_value))
                         player_choice = get_player_choice(player_hand_11, hand_11_bet)
-                        player_hand_11_value, hand_11_bet = play_out_hand(player_hand_11, hand_11_bet, player_choice)
+                        player_hand_11_value, hand_11_bet = play_out_hand(player_hand_11, hand_11_bet,
+                                                                          player_choice)
                         if player_hand_11_value:
                             final_hands.append((player_hand_11_value, hand_11_bet))
                         player_hand_12_card_2 = deal_card(working_deck)
@@ -443,7 +455,8 @@ while dealing:
                         print("You got the {0}\n for a total of {1}".format(player_hand_12_card_2[0],
                                                                             player_hand_12_value))
                         player_choice = get_player_choice(player_hand_12, hand_12_bet)
-                        player_hand_12_value, hand_12_bet = play_out_hand(player_hand_12, hand_12_bet, player_choice)
+                        player_hand_12_value, hand_12_bet = play_out_hand(player_hand_12, hand_12_bet,
+                                                                          player_choice)
                         if player_hand_12_value:
                             final_hands.append((player_hand_12_value, hand_12_bet))
                     else:
@@ -455,7 +468,8 @@ while dealing:
                     player_hand_10_value = sum(player_hand_10)
                     print("\n*************\n")
                     print("\nPLAYING NEXT HAND\n")
-                    print("You got the {0}\n for a total of {1}".format(player_hand_10_card_2[0], player_hand_10_value))
+                    print("You got the {0}\n for a total of {1}".format(player_hand_10_card_2[0],
+                                                                        player_hand_10_value))
                     player_choice = get_player_choice(player_hand_10, hand_10_bet)
                     if player_choice == "sp":
                         print("--SPLITTING--\n")
@@ -499,6 +513,31 @@ while dealing:
         final_hand = play_out_hand(player_hand, bet, player_choice)
         if final_hand:
             final_hands.append(final_hand)
+    if final_hands:
+        dealer_value = play_dealer_hand(dealer_card_1, dealer_hand)
+        if not dealer_value:
+            print("Dealer Busts!")
+        for hand in final_hands:
+            if len(final_hands) > 1:
+                print("Hand {0} of {1}".format((final_hands.index(hand) + 1), len(final_hands)))
+            if not dealer_value:
+                print("You win ${0}".format(hand[1]))
+                stake += hand[1] * 2
+                continue
+            else:
+                print("You have {0}".format(hand[0]))
+                print("The dealer has {0}".format(dealer_value))
+            if hand[0] > dealer_value:
+                print("You win ${0}".format(hand[1]))
+                stake += hand[1] * 2
+            elif hand[0] < dealer_value:
+                print("You lose ${0}".format(hand[1]))
+            else:
+                print("You have pushed")
+                stake += bet
+            print("\n*************\n")
+
+    check_money()
     if end_game() == "n":
         dealing = False
     # build a new deck if the current deck is 2/3rds gone
