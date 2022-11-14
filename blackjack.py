@@ -174,7 +174,9 @@ def end_game():
             print("You broke even and walked away with ${0}".format(stake))
         else:
             print("You lost ${0} and walked away with ${1}".format(-winnings, stake))
-    return again
+        return True
+    else:
+        return False
 
 
 def split(hand, bet):
@@ -209,7 +211,8 @@ def split(hand, bet):
         stake -= bet
         number_of_hands += 1
         split(hand_1, hand_1_bet)
-    play_out_hand(hand_1, hand_1_bet, choice)
+    else:
+        play_out_hand(hand_1, hand_1_bet, choice)
     hand_2_card_2 = deal_card(working_deck)
     hand_2.append(hand_2_card_2[1])
     hand_2_value = sum(hand_2)
@@ -221,17 +224,17 @@ def split(hand, bet):
         stake -= bet
         number_of_hands += 1
         split(hand_2, hand_2_bet)
-    play_out_hand(hand_2, hand_2_bet, choice_2)
+    else:
+        play_out_hand(hand_2, hand_2_bet, choice_2)
     return
 
 
 def check_money():
     global stake
-    money = True
     if stake == 0:
-        money = False
         print("You are out of money. Better luck next time!")
-    return money
+        return False
+    return True
 
 
 # request a number of decks
@@ -305,19 +308,19 @@ while dealing:
             print("You won ${0}".format(int(bet * 1.5)))
             stake += int(bet + (bet * 1.5))
             print("\n*************\n")
-            if end_game() == "n":
+            if end_game():
                 break
             else:
                 continue
         else:
             print("Dealer has blackjack, you have pushed")
             if insurance:
-                print("Insurance pays you ${0}".format(bet * 1.5))
-                stake += bet * 2.5
+                print("Insurance pays you ${0}".format(int(insurance_bet * 2)))
+                stake += int((insurance_bet * 3) + bet)
             else:
                 stake += bet
             print("\n*************\n")
-        if end_game() == "n":
+        if end_game():
             break
         else:
             continue
@@ -325,14 +328,14 @@ while dealing:
     if dealer_value == 21:
         print("Dealer has blackjack!")
         if insurance:
-            print("Insurance pays you ${0}".format(bet * 1.5))
-            stake += bet + insurance_bet
+            print("Insurance pays you ${0}".format(int(insurance_bet * 2)))
+            stake += int(insurance_bet * 3)
         else:
             print("You lost ${0}".format(bet))
         if not check_money():
             break
         print("\n*************\n")
-        if end_game() == 'n':
+        if end_game():
             break
         else:
             continue
@@ -351,29 +354,31 @@ while dealing:
         if not dealer_value:
             print("Dealer Busts!")
             print("\n*************\n")
-        for hand in final_hands:
+        for i in range(len(final_hands)):
+            final_value = final_hands[i][0]
+            final_bet = final_hands[i][1]
             if len(final_hands) > 1:
-                print("Hand {0} of {1}".format((final_hands.index(hand) + 1), len(final_hands)))
+                print("Hand {0} of {1}".format((i + 1), len(final_hands)))
             if not dealer_value:
-                print("You win ${0}".format(hand[1]))
-                stake += hand[1] * 2
+                print("You win ${0}".format(final_bet))
+                stake += final_bet * 2
                 continue
             else:
-                print("You have {0}".format(hand[0]))
+                print("You have {0}".format(final_value))
                 print("The dealer has {0}".format(dealer_value))
-            if hand[0] > dealer_value:
-                print("You win ${0}".format(hand[1]))
-                stake += hand[1] * 2
-            elif hand[0] < dealer_value:
-                print("You lose ${0}".format(hand[1]))
+            if final_value > dealer_value:
+                print("You win ${0}".format(final_bet))
+                stake += final_bet * 2
+            elif final_value < dealer_value:
+                print("You lose ${0}".format(final_bet))
             else:
                 print("You have pushed")
-                stake += bet
+                stake += final_bet
             print("\n*************\n")
 
     if not check_money():
         dealing = False
-    if end_game() == "n":
+    if end_game():
         dealing = False
     # build a new deck if the current deck is 2/3rds gone
     if remaining_cards < (number_of_decks*52)/3:
